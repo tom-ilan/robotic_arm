@@ -27,7 +27,7 @@ void loop() {
     int servoThreeInput = Serial.read();
 
     // Prints what each servo got as input
-    Serial.print("Servo1: ");
+    Serial.print(" Servo1: ");
     Serial.print(servoOneInput);
     Serial.print(" Servo2: ");
     Serial.print(servoTwoInput);

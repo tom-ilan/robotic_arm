@@ -1,59 +1,36 @@
-# For kinemtaic calculations
-from math import sin, cos, sqrt, acos, atan, degrees
+import math
 
-# Length of each arm
-lower_arm_length = 100
-upper_arm_length = 64
+top_arm = 64
+bottom_arm = 100
 
-# Kinematics for the arm 
-def arm_x_y_kinematics(x: int | float, y: int | float):
+def base_rotation (x: int | float, y: int | float):
 
-   # Corrects division by zero
-   if x == 0: x = 1
-   if y == 0: y = 1
+   radian_base_angle = math.atan2(y,x)
 
-   # Checks if the input is a valid point | float
-   if sqrt(x ** 2 + y ** 2) > 164 or sqrt(x ** 2 + y ** 2) < 36:
-      return 'Not a valid point | float'
-     
-   else:
-      # Angle calculations as described by:
-      # x = L1 * cos(θ1) + L2 * cos (θ1 + θ2)
-      # y = L1 * sin(θ1) + L2 * sin (θ1 + θ2)
-      upper_arm_angle_rad = acos((x**2 + y**2 - lower_arm_length**2 - upper_arm_length**2) / (2 * lower_arm_length * upper_arm_length))
-      lower_arm_angle_rad = (atan(y / x) - atan(upper_arm_length * sin(upper_arm_angle_rad) / (lower_arm_length + upper_arm_length * cos(upper_arm_angle_rad))))
-      return (degrees(upper_arm_angle_rad), degrees(lower_arm_angle_rad))
+   if radian_base_angle < 0: radian_base_angle += math.pi
 
-# Kinematics for the base
-def arm_z_x_kinematics(x: int | float, z: int | float):
-    
-   # Corrects division by zero
-   if x == 0: x = 1
-   if z == 0: y = 1
-
-    # Checks if the input is a valid point | float
-   if sqrt(x ** 2 + z ** 2) > 164 or sqrt(x ** 2 + z ** 2) < 36:
-      return 'Not a valid point | float'
+   return radian_base_angle
    
-   else:
-      # Calculates the base angle
-      base_angle = atan(z/x)
-      return base_angle
 
-# Does the kinematics for the whole arm.
-def arm_full_kinematics(x: int | float, y: int | float, z:  int | float):
-   
-   # Calculates base angles
-   base_angle = arm_z_x_kinematics(x, z)
+def top_kinematics (x: int | float, y: int | float, z: int | float):
+   new_x_y = math.sqrt(x ** 2 + y **2)
+   if new_x_y == 0: new_x_y = 1
 
-   # Calculates arm angles
-   arm_x = sqrt(z ** 2 + x ** 2)
-   upper_arm_angle = arm_x_y_kinematics(arm_x, y)[0]
-   lower_arm_angle = 180 - arm_x_y_kinematics(arm_x, y)[1]
 
-   if lower_arm_angle < 180 and upper_arm_angle < 180 and base_angle < 180:
-      return lower_arm_angle, upper_arm_angle, base_angle
-   
-   else: return 'Not a valid point'
+   base = math.sqrt(z**2 + new_x_y ** 2)
 
-print(arm_full_kinematics(123,100,0))
+   top_angle = math.acos((top_arm ** 2 + bottom_arm ** 2 - base ** 2) / (2 * top_arm * bottom_arm))
+
+   bottom_angle = math.asin((top_arm * math.sin(top_angle)) / base) + math.atan(z/new_x_y)
+
+   return math.degrees(top_angle) - 45, math.degrees(bottom_angle)
+
+# while True:
+#    x =int(input("x :"))
+#    y =int(input("y :"))
+#    z =int(input("z :"))
+#    top_angles = top_kinematics(x, y, z)
+#    servoOneInput = int((top_angles[0]))
+#    servoTwoInput = int((base_rotation(x, y)))
+#    servoThreeInput = int((top_angles[1]))
+#    print(servoOneInput,servoTwoInput,servoThreeInput)
