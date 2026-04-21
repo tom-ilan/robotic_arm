@@ -1,25 +1,55 @@
 import math
 
-top_arm = 64
-bottom_arm = 100
+TOP_ARM_LENGTH_MM = 64
+TOP_MOUNTING_OFFSET_ANGLE_RADIANS = -math.pi / 2
+BOTTOM_ARM_LENGTH_MM = 100
 
-def base_rotation (x: int | float, y: int | float):
-   base_angle = math.atan2(y,x)
-
-   if base_angle < 0: base_angle += math.pi
-
-   return math.degrees(base_angle)
+# Compute the robot arm angles,
+# given a target x, y and z.
+def get_robot_angles_degrees(x_mm: float, y_mm: float, z_mm: float) -> tuple[float, float, float]:
    
+   # Compute base angle.
+   base_angle_radians = math.atan2(y_mm, x_mm)
 
-def top_kinematics (x: int | float, y: int | float, z: int | float):
-   new_x_y = math.sqrt(x ** 2 + y **2) # Acounts for base rotation
+   # If the base angle is less than 0,
+   # we cannot move the servo to that position.
+   # Instead, we move the arm to the opposite position,
+   # And invert the target later.
+   inverted_x = base_angle_radians < 0
+   if inverted_x: 
+      base_angle_radians += math.pi
 
-   if new_x_y == 0: new_x_y = 1 # For avoiding division by zero error 
+   # Transform x, y, and z coordinates to post-base angle positioning,
+   # where the arm is in line with the target.
+   in_line_x_mm = math.sqrt(x_mm ** 2 + y_mm ** 2) * (-1 if inverted_x else 1)
+   in_line_z_mm = z_mm
 
-   base = math.sqrt(z**2 + new_x_y ** 2) # Hypotenous of the triangle formed by new_x_y and z
+   # Get distance and angle to target.
+   # Angle relative to x axis.
+   target_distance_mm = math.sqrt(in_line_z_mm ** 2 + in_line_x_mm ** 2)
+   target_angle_radians = math.atan2(in_line_z_mm, in_line_x_mm)
 
-   top_angle = math.acos((top_arm ** 2 + bottom_arm ** 2 - base ** 2) / (2 * top_arm * bottom_arm)) # Using cosine law
+   # Apply cosine law to find top angle.
+   top_angle_radians = math.acos(
+      (TOP_ARM_LENGTH_MM ** 2 + BOTTOM_ARM_LENGTH_MM ** 2 - target_distance_mm ** 2) / 
+      (2 * TOP_ARM_LENGTH_MM * BOTTOM_ARM_LENGTH_MM)
+   )
+   
+   # Apply sine law to find bottom angle.
+   target_to_bottom_angle_radians = math.asin(
+      (TOP_ARM_LENGTH_MM * math.sin(top_angle_radians)) /
+      target_distance_mm
+   )
+   
+   # Apply offset from target.
+   bottom_angle_radians = target_angle_radians + target_to_bottom_angle_radians
 
-   bottom_angle = math.asin((top_arm * math.sin(top_angle)) / base) + math.atan(z/new_x_y) # Using sine law
+   # Apply offset to top angle.
+   top_angle_radians += TOP_MOUNTING_OFFSET_ANGLE_RADIANS
 
-   return math.degrees(top_angle) - 45, math.degrees(bottom_angle)
+   # Make sure all angles are positive.
+   assert math.pi >= base_angle_radians >= 0
+   assert math.pi >= bottom_angle_radians >= 0
+   assert math.pi >= top_angle_radians >= 0
+
+   return base_angle_radians, bottom_angle_radians, top_angle_radians
