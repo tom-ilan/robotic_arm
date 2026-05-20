@@ -47,4 +47,6 @@ bin/
 # Temp/Autosave
 *~
 .~*
-!*__*
+
+# anything, anywhere starting with __
+__*

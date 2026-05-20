@@ -4,6 +4,8 @@ from num_packer import num_packer
 import math
 import kinematics
 
+# Function to move the robot arm to a specific x, y, z coordinate in millimeters
+# It is precise due to being able to drive in centi degrees, but it has less ROM, of only 45-135 degrees.
 def go_to_precise(ser, x_mm: float, y_mm: float, z_mm: float):
 
         # get_robot_angles_degrees returns radians — convert to degrees before packing
