@@ -9,9 +9,9 @@ void setup() {
   Serial.begin(9600);
 
   // Servo attaching to pins with explicit pulse range
-  servoOne.attach(3, 1000, 2000);
-  servoTwo.attach(5, 1000, 2000);
-  servoThree.attach(6, 1000, 2000);
+  servoOne.attach(3, 500, 2500);
+  servoTwo.attach(5, 500, 2500);
+  servoThree.attach(6, 500, 2500);
 }
 
 void loop() {
