@@ -15,8 +15,8 @@ float twoByteCentiDegreeTooFloat(byte byte1, byte byte2){
 
 
 void floatServoDriver(Servo &servo, float degree){
-   // Map degrees (0-180) to microseconds (1000-2000µs)
-   int microseconds = map(degree, 90, 135, 1500, 2000);
+   // Map degrees (0-180) to microseconds (500-2500µs)
+   int microseconds = map(degree, 0, 180, 500, 2500);
   
    servo.writeMicroseconds(microseconds);
    Serial.println(microseconds);
