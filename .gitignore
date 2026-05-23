@@ -48,5 +48,8 @@ bin/
 *~
 .~*
 
-# anything, anywhere starting with __
-__*
+# Ignore any test or temporary files starting with double underscores in any directory
+**/__*
+
+# Ignore the antigravity CLI tool configuration file
+.antigravitycli
