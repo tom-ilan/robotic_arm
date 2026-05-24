@@ -16,23 +16,24 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
 ## 📂 Project Directory Structure
 
 ```filepath
-├── README.md                      # Project documentation
-├── version_1/                     # 3D printable CAD models
-│   ├── Base_2.stl                 # Rotational mount base
-│   ├── Base_top_2.stl             # Upper turntable base
-│   ├── Lower_arm.stl              # Primary vertical segment (100mm)
-│   ├── Upper_arm.stl              # Secondary arm segment (64mm)
-│   └── Robotic_Arm_Print_1.3mf    # Combined print-bed workspace file
+├── README.md                        # Project documentation
+├── version_1/                       # 3D printable CAD models for the arm
+│   ├── 1.1
+│   ├── 1.2                          # First printed version
+│   ├── 1.3                          # Fixes to the lower arm and upper base
+│   ├── 1.4                          # Latest additions to the arm
+│ 
 │
-└── Robot_Arm_Controller/          # Hardware control & simulation scripts
-    ├── main.py                    # Interactive console CLI controller
-    ├── __test3.py                 # Advanced Pygame UI & path sequencer
-    ├── kinematics.py              # Mathematical IK solvers
-    ├── num_packer.py              # Serial data compression helper
+└── Robot_Arm_Controller/            # Hardware control & simulation scripts
+    ├── main.py                      # Interactive console CLI controller
+    ├── num_packer.py                # Serial data compression helper
+    ├── kinematics.py                # Mathematical IK solvers
+    ├── go_to.py                     # Sends the angles to the arduino
+    ├── arm_controller_gui           # ⚠️ In development ⚠️ GUI for controlling the robotic arm
     │
-    └── robot_arm_controller/      # Arduino firmware
+    └── robot_arm_controller/        # Arduino firmware
         ├── robot_arm_controller.ino # Main serial packet loop
-        └── servo_controller.ino   # Microsecond servo driver
+        └── servo_controller.ino     # Microsecond servo driver
 ```
 
 ---
@@ -45,6 +46,9 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
    - **Servo 2**: Shoulder / Lower Arm (Pin 5)
    - **Servo 3**: Elbow / Upper Arm (Pin 6)
 3. **Power**: 5V external power supply (recommended for servos to prevent USB current limit trip).
+4. **Screws**: 
+    - 8x **M2 x 10mm**
+    - 4x **M2.5 x 5mm**
 
 ---
 
@@ -63,17 +67,15 @@ pip install pygame pyserial
 ```
 
 ### 3. Run the Controllers
-Configure your USB Modem port at the top of the python scripts, then run either the CLI or Pygame dashboard:
+Configure your USB Modem port at the top of the python scripts, then run either the CLI or the GUI:
 
-* **Interactive Pygame UI** (Highly Recommended):
-  ```bash
-  python Robot_Arm_Controller/__test3.py
-  ```
-  *Click inside the XY or XZ grid views to position the cursor, drag waypoints, edit values inline, and press **RUN** to execute the sequence.*
-
-* **Command Line Controller**:
+* **CLI Controller**:
   ```bash
   python Robot_Arm_Controller/main.py
+  ```
+* **GUI Controller (In Dev)**:
+  ```bash
+  python Robot_Arm_Controller/arm_controller_gui.py
   ```
 
 ---
