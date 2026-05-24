@@ -11,6 +11,6 @@ i = 0
 # Sets up a serial connection the ardunino via the USB modem
 with serial.Serial('/dev/cu.usbmodem1101') as ser:
     while True:
-        go_to.go_to_precise(ser, x_mm = int(input('x: ')), y_mm = int(input('y: ')), z_mm = int(input('z: ')))
+        go_to.go_to_radians(ser, x_mm = int(input('x: ')), y_mm = int(input('y: ')), z_mm = int(input('z: ')))
 
 
