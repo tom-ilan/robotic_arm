@@ -22,9 +22,9 @@ USE_REAL_ARM = True
 SERIAL_PORT  = '/dev/cu.usbmodem1101'
 BAUD_RATE    = 115200  # High speed for smooth real-time control
 
-# Arm Dimensions (mm)
-L1 = 100.0   # Shoulder-to-Elbow length
-L2 =  64.0   # Elbow-to-End-Effector length
+# Arm Dimensions (mm) - Imported directly from kinematics.py for single-point configuration
+L1 = kinematics.BOTTOM_ARM_LENGTH_MM   # Shoulder-to-Elbow length (100mm default)
+L2 = kinematics.TOP_ARM_LENGTH_MM      # Elbow-to-End-Effector length (64mm default)
 TOP_MOUNTING_OFFSET_ANGLE = -math.pi / 2  # Offset applied to elbow servo
 
 # Physical Servo ROM Limits (Degrees)
@@ -69,21 +69,18 @@ def solve_ik(x, y, z):
       joints: dict of 2D projection coordinates for visualization
     """
     try:
-        # kinematics.get_robot_angles_degrees returns base, bottom, top in radians
-        base_rad, bottom_rad, top_rad = kinematics.get_robot_angles_degrees(x, y, z)
+        # kinematics.get_robot_angles_radians returns base, bottom, top in radians
+        base_rad, bottom_rad, top_rad = kinematics.get_robot_angles_radians(x, y, z)
         
         # Convert to degrees
         base_deg = math.degrees(base_rad)
         bottom_deg = math.degrees(bottom_rad)
         top_deg = math.degrees(top_rad)
         
-        # Project horizontal distance (r) and side projection coordinates
-        # to draw the arm representation correctly in the XZ Front View
-        base_deg_calc = math.degrees(math.atan2(y, x))
-        inverted_x = base_deg_calc < 0
+        # In-line planar projection along the base rotation baseline (maintains physical link lengths L1 and L2):
+        inverted_x = math.atan2(y, x) < 0
         r = math.sqrt(x**2 + y**2) * (-1.0 if inverted_x else 1.0)
         
-        # In base-rotation inline projection, elbow_x and elbow_z coordinates:
         elbow_x = L1 * math.cos(bottom_rad) * (-1.0 if inverted_x else 1.0)
         elbow_z = L1 * math.sin(bottom_rad)
         
@@ -108,10 +105,11 @@ def solve_ik(x, y, z):
 
 class Waypoint:
     _counter = 1
-    def __init__(self, x=100.0, y=0.0, z=100.0):
+    def __init__(self, x=100.0, y=0.0, z=100.0, gripper=90.0):
         self.x = float(x)
         self.y = float(y)
         self.z = float(z)
+        self.gripper = float(gripper)
         self.label = f"P{Waypoint._counter:02d}"
         Waypoint._counter += 1
         self.update_status()
@@ -120,7 +118,7 @@ class Waypoint:
         self.angles, self.status, self.joints = solve_ik(self.x, self.y, self.z)
 
     def as_ints(self):
-        return int(round(self.x)), int(round(self.y)), int(round(self.z))
+        return int(round(self.x)), int(round(self.y)), int(round(self.z)), int(round(self.gripper))
 
 
 # ── App Main Loop & User Interface ────────────────────────────────────────────
@@ -151,11 +149,13 @@ class RobotArmUI:
         self.cursor_x = 100.0
         self.cursor_y = 0.0
         self.cursor_z = 100.0
+        self.cursor_gripper = 90.0
 
         # Dynamic visual projection coordinates (smoothing / simulation playback)
         self.arm_x = 100.0
         self.arm_y = 0.0
         self.arm_z = 100.0
+        self.arm_gripper = 90.0
 
         # Dragging states
         self.dragging_point = None  # (index, 'xy'|'xz')
@@ -169,8 +169,10 @@ class RobotArmUI:
         self._add_waypoint_at(100.0, 0.0, 100.0)
         self._add_waypoint_at(80.0, 80.0, 120.0)
 
-    def _add_waypoint_at(self, x, y, z):
-        wp = Waypoint(x, y, z)
+    def _add_waypoint_at(self, x, y, z, gripper=None):
+        if gripper is None:
+            gripper = self.cursor_gripper
+        wp = Waypoint(x, y, z, gripper)
         self.waypoints.append(wp)
         self.selected = len(self.waypoints) - 1
 
@@ -179,9 +181,9 @@ class RobotArmUI:
     def _view_rects(self):
         W, H = self.screen.get_size()
         rx = TIMELINE_W + PAD
-        ry = PAD
+        ry = PAD + 60
         rw = W - TIMELINE_W - PAD * 2
-        rh = (H - PAD * 3) // 2
+        rh = (H - ry - PAD * 2) // 2
         xy_rect = pygame.Rect(rx, ry,          rw, rh)
         xz_rect = pygame.Rect(rx, ry + rh + PAD, rw, H - ry - rh - PAD * 2)
         return xy_rect, xz_rect
@@ -315,7 +317,12 @@ class RobotArmUI:
             
         pts = []
         for i, wp in enumerate(self.waypoints):
-            p = self._w2xy(wp.x, wp.y, rect) if view == 'xy' else self._w2xz(wp.x, wp.z, rect)
+            if view == 'xy':
+                p = self._w2xy(wp.x, wp.y, rect)
+            else:
+                wp_inverted = math.atan2(wp.y, wp.x) < 0
+                wp_r = math.sqrt(wp.x**2 + wp.y**2) * (-1.0 if wp_inverted else 1.0)
+                p = self._w2xz(wp_r, wp.z, rect)
             pts.append(p)
             
             # Map safety color
@@ -402,7 +409,7 @@ class RobotArmUI:
             self.screen.blit(s_lbl, (row_rect.right - s_lbl.get_width() - 8, ry + 4))
 
             # Coordinates string
-            coord_str = f"X: {wp.x:+.1f} | Y: {wp.y:+.1f} | Z: {wp.z:+.1f}"
+            coord_str = f"X: {wp.x:+.1f} | Y: {wp.y:+.1f} | Z: {wp.z:+.1f} | G: {wp.gripper:.0f}°"
             c_lbl = self.font_mono.render(coord_str, True, GREY)
             self.screen.blit(c_lbl, (row_rect.x + 8, ry + 20))
 
@@ -442,28 +449,37 @@ class RobotArmUI:
         pygame.draw.rect(self.screen, (15, 20, 30), panel, border_radius=6)
         pygame.draw.rect(self.screen, ACCENT, panel, 1, border_radius=6)
 
-        fields = [('x', wp.x), ('y', wp.y), ('z', wp.z)]
+        fields = [('x', wp.x), ('y', wp.y), ('z', wp.z), ('gripper', wp.gripper)]
         for idx, (field, val) in enumerate(fields):
-            fx = ex + idx * 80
+            fx = ex + idx * 60
             fy = ey + 8
             active = self.edit['field'] == field
             
-            box_rect = pygame.Rect(fx, fy, 74, 28)
+            box_rect = pygame.Rect(fx, fy, 56, 28)
             pygame.draw.rect(self.screen, PANEL_BG if not active else (22, 40, 70), box_rect, border_radius=4)
             pygame.draw.rect(self.screen, ACCENT if active else BORDER, box_rect, 1, border_radius=4)
             
             buf_str = self.edit['buf'] if active else f"{val:.1f}"
             caret = "|" if active and (pygame.time.get_ticks() // 500) % 2 == 0 else ""
             
-            t_lbl = self.font_mono.render(f"{field.upper()}:{buf_str}{caret}", True, WHITE if active else GREY)
+            label_text = f"{'G' if field=='gripper' else field.upper()}:{buf_str}{caret}"
+            t_lbl = self.font_mono.render(label_text, True, WHITE if active else GREY)
             self.screen.blit(t_lbl, (fx + 4, fy + 7))
 
         hint = self.font_sm.render("Tab: Next  |  Enter: Save  |  Esc: Cancel", True, GREY)
         self.screen.blit(hint, (ex, ey + 42))
 
     def _draw_selected_hud(self):
-        """Displays real-time kinematic debugging specs for selected waypoint."""
+        """Displays real-time kinematic debugging specs for selected waypoint in a dedicated header bar."""
+        W, H = self.screen.get_size()
+        
+        # Draw subtle bottom border/separator line for the HUD bar
+        pygame.draw.line(self.screen, BORDER, (TIMELINE_W + PAD, PAD + 48), (W - PAD, PAD + 48), 1)
+        
         if self.selected is None or self.selected >= len(self.waypoints):
+            # Render a premium fallback message when no waypoint is selected
+            msg = self.font_md.render("No Waypoint Selected — Click anywhere on the grids to add or edit waypoints", True, GREY)
+            self.screen.blit(msg, (TIMELINE_W + PAD + 10, PAD + 14))
             return
             
         wp = self.waypoints[self.selected]
@@ -479,13 +495,14 @@ class RobotArmUI:
             stat_lbl = "ANGLE BOUND EXCEEDED (LIMITS: 0° - 180°)"
 
         info_text = f"SELECTED: {wp.label} | STATE: {stat_lbl}"
-        deg_text = f"Base: {wp.angles[0]:.1f}° | Shoulder: {wp.angles[1]:.1f}° | Elbow: {wp.angles[2]:.1f}°"
+        deg_text = f"Base: {wp.angles[0]:.1f}° | Shoulder: {wp.angles[1]:.1f}° | Elbow: {wp.angles[2]:.1f}° | Gripper: {wp.gripper:.1f}°"
         
         lbl_info = self.font_lg.render(info_text, True, col)
         lbl_deg = self.font_mono.render(deg_text, True, GREY)
         
-        self.screen.blit(lbl_info, (TIMELINE_W + PAD + 10, 10))
-        self.screen.blit(lbl_deg, (TIMELINE_W + PAD + 10, 32))
+        # Render within the dedicated HUD vertical safe space
+        self.screen.blit(lbl_info, (TIMELINE_W + PAD + 10, PAD))
+        self.screen.blit(lbl_deg, (TIMELINE_W + PAD + 10, PAD + 24))
 
     # ── Threaded Serial Sequence Executor (Resolving Reset Bugs) ───────────────
 
@@ -525,9 +542,10 @@ class RobotArmUI:
                         self.arm_x = wp.x
                         self.arm_y = wp.y
                         self.arm_z = wp.z
+                        self.arm_gripper = wp.gripper
                         
                         # Transmit coordinates using the official movement API in go_to.py
-                        go_to.go_to_radians(ser, wp.x, wp.y, wp.z)
+                        go_to.go_to_radians(ser, wp.x, wp.y, wp.z, wp.gripper)
                         
                         # Realistic physical travel time delay (allows servos to sweep safely)
                         time.sleep(10)
@@ -560,15 +578,18 @@ class RobotArmUI:
                     
                     if dist <= step:
                         self.arm_x, self.arm_y, self.arm_z = wp.x, wp.y, wp.z
+                        self.arm_gripper = wp.gripper
                         break
                     else:
                         ratio = step / dist
                         self.arm_x += dx * ratio
                         self.arm_y += dy * ratio
                         self.arm_z += dz * ratio
+                        self.arm_gripper += (wp.gripper - self.arm_gripper) * ratio
                     time.sleep(0.05)
                 
                 self.arm_x, self.arm_y, self.arm_z = wp.x, wp.y, wp.z
+                self.arm_gripper = wp.gripper
                 time.sleep(0.2)
 
         self.running = False
@@ -586,8 +607,8 @@ class RobotArmUI:
                 self.edit = None
             elif event.key == pygame.K_TAB:
                 self._commit_edit()
-                fields = ['x', 'y', 'z']
-                next_f = fields[(fields.index(self.edit['field']) + 1) % 3]
+                fields = ['x', 'y', 'z', 'gripper']
+                next_f = fields[(fields.index(self.edit['field']) + 1) % 4]
                 wp = self.waypoints[self.selected]
                 self.edit = {
                     'idx': self.selected,
@@ -621,7 +642,12 @@ class RobotArmUI:
             field = self.edit['field']
             
             # Workspace clamping parameters
-            limits = {'x': (X_MIN, X_MAX), 'y': (Y_MIN, Y_MAX), 'z': (Z_MIN, Z_MAX)}[field]
+            limits = {
+                'x': (X_MIN, X_MAX),
+                'y': (Y_MIN, Y_MAX),
+                'z': (Z_MIN, Z_MAX),
+                'gripper': (LIMIT_ANGLE_MIN, LIMIT_ANGLE_MAX)
+            }[field]
             setattr(wp, field, self._clamp(val, *limits))
             wp.update_status()
             
@@ -642,7 +668,13 @@ class RobotArmUI:
     def _click_view(self, mx, my, rect, view):
         # 1. Check if user clicked to drag an existing waypoint first
         for i, wp in enumerate(self.waypoints):
-            p = self._w2xy(wp.x, wp.y, rect) if view == 'xy' else self._w2xz(wp.x, wp.z, rect)
+            if view == 'xy':
+                p = self._w2xy(wp.x, wp.y, rect)
+            else:
+                wp_inverted = math.atan2(wp.y, wp.x) < 0
+                wp_r = math.sqrt(wp.x**2 + wp.y**2) * (-1.0 if wp_inverted else 1.0)
+                p = self._w2xz(wp_r, wp.z, rect)
+                
             if math.hypot(mx - p[0], my - p[1]) < 12:
                 self.selected = i
                 self.dragging_point = (i, view)
@@ -655,9 +687,16 @@ class RobotArmUI:
             self.cursor_x = self._clamp(cx, X_MIN, X_MAX)
             self.cursor_y = self._clamp(cy, Y_MIN, Y_MAX)
         else:
-            cx, cz = self._xz2w(mx, my, rect)
-            self.cursor_x = self._clamp(cx, X_MIN, X_MAX)
+            cr, cz = self._xz2w(mx, my, rect)
+            cr = self._clamp(cr, X_MIN, X_MAX)
             self.cursor_z = self._clamp(cz, Z_MIN, Z_MAX)
+            # Maintain the current base rotation baseline angle in [0, pi]
+            beta = math.atan2(self.cursor_y, self.cursor_x)
+            if beta < 0:
+                beta += math.pi
+            r = cr * (1.0 if math.cos(beta) >= 0 else -1.0)
+            self.cursor_x = r * math.cos(beta)
+            self.cursor_y = r * math.sin(beta)
             
         self._add_waypoint_at(self.cursor_x, self.cursor_y, self.cursor_z)
         self.dragging_point = (len(self.waypoints) - 1, view)
@@ -697,6 +736,7 @@ class RobotArmUI:
                 self.arm_x = self.cursor_x
                 self.arm_y = self.cursor_y
                 self.arm_z = self.cursor_z
+                self.arm_gripper = self.cursor_gripper
 
             # Calculate active IK solutions for drawing
             arm_angles, arm_status, arm_joints = solve_ik(self.arm_x, self.arm_y, self.arm_z)
@@ -760,9 +800,16 @@ class RobotArmUI:
                         self.cursor_x = self._clamp(cx, X_MIN, X_MAX)
                         self.cursor_y = self._clamp(cy, Y_MIN, Y_MAX)
                     elif xz_rect.collidepoint(mx, my) and self.dragging_point is None:
-                        cx, cz = self._xz2w(mx, my, xz_rect)
-                        self.cursor_x = self._clamp(cx, X_MIN, X_MAX)
+                        cr, cz = self._xz2w(mx, my, xz_rect)
+                        cr = self._clamp(cr, X_MIN, X_MAX)
                         self.cursor_z = self._clamp(cz, Z_MIN, Z_MAX)
+                        # Maintain current base rotation baseline angle in [0, pi]
+                        beta = math.atan2(self.cursor_y, self.cursor_x)
+                        if beta < 0:
+                            beta += math.pi
+                        r = cr * (1.0 if math.cos(beta) >= 0 else -1.0)
+                        self.cursor_x = r * math.cos(beta)
+                        self.cursor_y = r * math.sin(beta)
                         
                     # Handle Waypoint Dragging dynamics
                     if self.dragging_point is not None:
@@ -772,10 +819,25 @@ class RobotArmUI:
                             wp.x, wp.y = self._xy2w(mx, my, xy_rect)
                             wp.x = self._clamp(wp.x, X_MIN, X_MAX)
                             wp.y = self._clamp(wp.y, Y_MIN, Y_MAX)
+                            # Update cursor and active arm position to follow the dragged point
+                            self.cursor_x = wp.x
+                            self.cursor_y = wp.y
                         elif view == 'xz' and xz_rect.collidepoint(mx, my):
-                            wp.x, wp.z = self._xz2w(mx, my, xz_rect)
-                            wp.x = self._clamp(wp.x, X_MIN, X_MAX)
-                            wp.z = self._clamp(wp.z, Z_MIN, Z_MAX)
+                            cr, cz = self._xz2w(mx, my, xz_rect)
+                            cr = self._clamp(cr, X_MIN, X_MAX)
+                            cz = self._clamp(cz, Z_MIN, Z_MAX)
+                            # Maintain current waypoint base rotation angle in [0, pi]
+                            wp_beta = math.atan2(wp.y, wp.x)
+                            if wp_beta < 0:
+                                wp_beta += math.pi
+                            wp_r = cr * (1.0 if math.cos(wp_beta) >= 0 else -1.0)
+                            wp.x = wp_r * math.cos(wp_beta)
+                            wp.y = wp_r * math.sin(wp_beta)
+                            wp.z = cz
+                            # Update cursor and active arm position to follow the dragged point
+                            self.cursor_x = wp.x
+                            self.cursor_y = wp.y
+                            self.cursor_z = wp.z
                         wp.update_status()
 
             # Render Pipeline
@@ -810,13 +872,19 @@ class RobotArmUI:
             self._draw_reach_regions(xz_rect, 'xz')
             
             for wp in self.waypoints:
-                self._draw_robot_arm_xz(xz_rect, wp.x, wp.z, wp.status, wp.joints)
+                wp_inverted = math.atan2(wp.y, wp.x) < 0
+                wp_r = math.sqrt(wp.x**2 + wp.y**2) * (-1.0 if wp_inverted else 1.0)
+                self._draw_robot_arm_xz(xz_rect, wp_r, wp.z, wp.status, wp.joints)
                 
-            self._draw_robot_arm_xz(xz_rect, self.arm_x, self.arm_z, arm_status, arm_joints)
+            arm_inverted = math.atan2(self.arm_y, self.arm_x) < 0
+            arm_r = math.sqrt(self.arm_x**2 + self.arm_y**2) * (-1.0 if arm_inverted else 1.0)
+            self._draw_robot_arm_xz(xz_rect, arm_r, self.arm_z, arm_status, arm_joints)
             self._draw_waypoints_and_path('xz', xz_rect)
             
             # Cursor crosshair lines
-            cp_xz = self._w2xz(self.cursor_x, self.cursor_z, xz_rect)
+            cursor_inverted = math.atan2(self.cursor_y, self.cursor_x) < 0
+            cursor_r = math.sqrt(self.cursor_x**2 + self.cursor_y**2) * (-1.0 if cursor_inverted else 1.0)
+            cp_xz = self._w2xz(cursor_r, self.cursor_z, xz_rect)
             pygame.draw.line(self.screen, GRID, (cp_xz[0], xz_rect.y), (cp_xz[0], xz_rect.bottom), 1)
             pygame.draw.line(self.screen, GRID, (xz_rect.x, cp_xz[1]), (xz_rect.right, cp_xz[1]), 1)
             

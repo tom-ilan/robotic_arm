@@ -29,7 +29,7 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
     ├── num_packer.py                # Serial data compression helper
     ├── kinematics.py                # Mathematical IK solvers
     ├── go_to.py                     # Sends the angles to the arduino
-    ├── arm_controller_gui           # ⚠️ In development ⚠️ GUI for controlling the robotic arm
+    ├── arm_controller_gui.py        # ⚠️ In development ⚠️ GUI for controlling the robotic arm
     │
     └── robot_arm_controller/        # Arduino firmware
         ├── robot_arm_controller.ino # Main serial packet loop
@@ -41,10 +41,11 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
 ## 🛠️ Hardware Requirements
 
 1. **Microcontroller**: Arduino Uno, Nano, or any AVR/ARM board.
-2. **Servos**: 3x standard micro-servos (e.g., SG90 or MG90S).
+2. **Servos**: 4x standard micro-servos (e.g., SG90 or MG90S).
    - **Servo 1**: Turntable Base (Pin 3)
    - **Servo 2**: Shoulder / Lower Arm (Pin 5)
    - **Servo 3**: Elbow / Upper Arm (Pin 6)
+   - **Servo 4**: Gripper Claw (Pin 9)
 3. **Power**: 5V external power supply (recommended for servos to prevent USB current limit trip).
 4. **Screws**: 
     - 8x **M2 x 10mm**
@@ -55,7 +56,7 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
 ## 🚀 Getting Started
 
 ### 1. Arduino Setup
-1. Open the [robot_arm_controller.ino](file:///Users/tomilan/Projects/robotic_arm/Robot_Arm_Controller/robot_arm_controller/robot_arm_controller.ino) in the **Arduino IDE**.
+1. Open the [robot_arm_controller.ino](file:///Users/tomilan/projects/robotic_arm/Robot_Arm_Controller/robot_arm_controller/robot_arm_controller.ino) in the **Arduino IDE**.
 2. Connect your Arduino board via USB.
 3. Select your Board and Port from the Tools menu.
 4. Click **Upload** to flash the firmware.

@@ -1,12 +1,15 @@
 import math
 
-TOP_ARM_LENGTH_MM = 64
+# ── PHYSICAL CONFIGURATION ───────────────────────────────────────────────────
+# Easily adjust the mechanical arm segment lengths here:
+BOTTOM_ARM_LENGTH_MM = 100.0   # Shoulder-to-Elbow length (Shoulder)
+TOP_ARM_LENGTH_MM    = 64.0    # Elbow-to-End-Effector length (Elbow)
+
 TOP_MOUNTING_OFFSET_ANGLE_RADIANS = -math.pi / 2
-BOTTOM_ARM_LENGTH_MM = 100
 
 # Compute the robot arm angles,
 # given a target x, y and z.
-def get_robot_angles_degrees(x_mm: float, y_mm: float, z_mm: float) -> tuple[float, float, float]:
+def get_robot_angles_radians(x_mm: float, y_mm: float, z_mm: float) -> tuple[float, float, float]:
    
    # Compute base angle.
    base_angle_radians = math.atan2(y_mm, x_mm)
