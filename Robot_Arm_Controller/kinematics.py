@@ -53,8 +53,6 @@ def get_robot_angles_radians(x_mm: float, y_mm: float, z_mm: float) -> tuple[flo
    # Make sure all angles are positive.
    assert math.pi >= base_angle_radians >= 0
    assert math.pi >= bottom_angle_radians >= 0
-   print(math.degrees(top_angle_radians))
-   print(math.degrees(base_angle_radians))
    assert math.pi >= top_angle_radians >= 0
 
    return base_angle_radians, bottom_angle_radians, top_angle_radians

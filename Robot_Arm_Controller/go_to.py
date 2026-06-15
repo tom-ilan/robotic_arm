@@ -5,7 +5,7 @@ import math
 import kinematics
 
 # Function to move the robot arm to a specific x, y, z coordinate in millimeters
-def go_to_radians(ser, x_mm: float, y_mm: float, z_mm: float, gripper_degrees: float):
+def go_to_mm(ser, x_mm: float, y_mm: float, z_mm: float, gripper_degrees: float):
 
         # get_robot_angles_radians returns radians — convert to degrees before packing
         base_rad, bottom_rad, top_rad = kinematics.get_robot_angles_radians(x_mm, y_mm, z_mm)

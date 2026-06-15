@@ -1,4 +1,5 @@
 #include <Servo.h>
+#include <EEPROM.h>
 
 // Servo set up
 Servo servoOne;
@@ -8,6 +9,34 @@ Servo servoFour;
 
 void setup() {
   Serial.begin(9600);
+
+  // Read positions from EEPROM
+  int s1 = EEPROM.read(0);
+  int s2 = EEPROM.read(1);
+  int s3 = EEPROM.read(2);
+  int s4 = EEPROM.read(3);
+
+  // If EEPROM is uninitialized (255) or out of servo range, default to 90 degrees
+  if (s1 < 0 || s1 > 180) s1 = 90;
+  if (s2 < 0 || s2 > 180) s2 = 90;
+  if (s3 < 0 || s3 > 180) s3 = 90;
+  if (s4 < 0 || s4 > 180) s4 = 90;
+
+  // Write initial positions to prevent the default 90-degree attach snap
+  servoOne.write(s1);
+  servoTwo.write(s2);
+  servoThree.write(s3);
+  servoFour.write(s4);
+
+  // Print startup angles in a recognizable single-line format
+  Serial.print("INIT:");
+  Serial.print(s1);
+  Serial.print(",");
+  Serial.print(s2);
+  Serial.print(",");
+  Serial.print(s3);
+  Serial.print(",");
+  Serial.println(s4);
 
   // Servo attaching to pins with explicit pulse range
   servoOne.attach(3, 500, 2500); // base
@@ -75,5 +104,10 @@ void loop() {
     floatServoDriver(servoTwo, servoTwoInput);
     floatServoDriver(servoThree, servoThreeInput);
     floatServoDriver(servoFour, servoFourInput);
+
+    EEPROM.write(0, servoOneInput);
+    EEPROM.write(1, servoTwoInput);
+    EEPROM.write(2, servoThreeInput);
+    EEPROM.write(3, servoFourInput);
   }
 }
