@@ -19,18 +19,19 @@ def go_to_mm(ser, x_mm: float, y_mm: float, z_mm: float, gripper_degrees: float)
         top_degrees_packed_big, top_degrees_packed_little = num_packer(top_degrees)
         gripper_degrees_packed_big, gripper_degrees_packed_little = num_packer(gripper_degrees) # Pack gripper degrees
 
-
+        # Send the packed bytes to the Arduino
         ser.write(bytes([base_degrees_packed_big, base_degrees_packed_little, bottom_degrees_packed_big, bottom_degrees_packed_little, top_degrees_packed_big, top_degrees_packed_little, gripper_degrees_packed_big, gripper_degrees_packed_little]))
         ser.flush()
         time.sleep(0.01)
 
-
+# A function to move the robot arm to specific joint angles (in degrees)
 def go_to_angle(ser, base: float, bottom: float, top: float, gripper_degrees: float):
- 
+
+        # Packs angles into bytes for sending to arduino
         base_degrees_packed_big, base_degrees_packed_little = num_packer(base)
         bottom_degrees_packed_big, bottom_degrees_packed_little = num_packer(bottom)
         top_degrees_packed_big, top_degrees_packed_little = num_packer(top)
         gripper_degrees_packed_big, gripper_degrees_packed_little = num_packer(gripper_degrees)
 
+        # Send the packed bytes to the Arduino
         ser.write(bytes([base_degrees_packed_big, base_degrees_packed_little, bottom_degrees_packed_big, bottom_degrees_packed_little, top_degrees_packed_big, top_degrees_packed_little, gripper_degrees_packed_big, gripper_degrees_packed_little]))
-# Sets up a serial connection the ardunino via the USB modem
