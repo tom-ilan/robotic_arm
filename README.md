@@ -68,7 +68,7 @@ Located under **version_1** in the **final_print_parts** folder is the full fina
 
 1. After 3D printing the parts place the first servo into the base
 
-![Step 1 - Servo seated in base housing](media/construction_step_1.png)
+![Step 1 - Servo seated in base housing](media/construction_step_.png)
 
 2. Then screw the top of the base onto the the servo
 
