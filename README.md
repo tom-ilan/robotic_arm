@@ -19,36 +19,6 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
 
 ---
 
-## 📂 Project Directory Structure
-
-```filepath
-├── README.md                           # Project documentation
-├── version_1/                          # 3D printable CAD models for the arm
-│   ├── 1.1/
-│   ├── 1.2/                            # First printed version
-│   ├── 1.3/                            # Fixes to lower arm and upper base
-│   └── 1.4/                            # Latest mechanical iterations (STL, 3MF, F3Z)
-│ 
-└── robot_arm_controller/               # Hardware control & simulation scripts
-    ├── __arm_controller_gui.py         # Pygame GUI dashboard for coordinate tracking & simulation
-    ├── __go_to_angle.py                # Test script for direct raw angle command writes
-    ├── angle_tui.py                    # Interactive joint-space console CLI (TUI)
-    ├── point_tui.py                    # Interactive Cartesian-space console CLI (TUI)
-    ├── smooth_glider.py                # Macro executor with smooth linear joint-space interpolation
-    ├── rigid_glider.py                 # Macro executor with direct steps and sleep delays
-    ├── glide_to.py                     # Trajectory gliding and joint interpolation algorithms
-    ├── go_to.py                        # Low-level serial command API (Cartesian & raw angle)
-    ├── kinematics.py                   # Analytical geometric Inverse Kinematics solver
-    ├── num_packer.py                   # Centidegree serial packet encoder
-    ├── __test_locations.csv            # Macro coordinates list (X, Y, Z, Gripper, Time)
-    │
-    └── robot_arm_firmware/             # Arduino firmware
-        ├── robot_arm_controller.ino    # Main command processor, EEPROM writer, and INIT handshake
-        └── servo_controller.ino        # Microsecond servo driver mapping functions
-```
-
----
-
 # Assembly
 
 ## 🛠️ Hardware Requirements
