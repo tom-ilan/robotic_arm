@@ -36,7 +36,8 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
 
 ## 🖨️ 3D Printing the parts
 
-Located under **version_1** in the **final_print_parts** folder is the full final print .3mf file for a Bambu Labs P2S, also included are the .stl files for printing on other 3D printers
+Located under **version_1** in the **final_print_parts** folder is the full final .stl files for printing, the settings used for a Bambu Labs P2S were the generic print settings with supports on. 
+
 
 ## 🪛 Assembly
 
