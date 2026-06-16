@@ -10,12 +10,12 @@ A high-performance, precision-controlled 3-axis robotic arm project featuring a 
 
 ## 🌟 Key Features
 
-* **📐 Precision Inverse Kinematics**: Custom analytical geometric IK engine solving joint coordinates in real time for precise target tracking.
-* **🔌 Sub-Degree Resolution Serial Protocol**: A binary serial packet protocol scaling float angles to centidegrees (1/100th of a degree) and packing them into compact 16-bit big-endian structures for optimal transmission speed and high accuracy.
-* **💾 Non-Volatile Memory (EEPROM)**: The Arduino firmware caches successful servo coordinates to the EEPROM on every valid command, preventing joint snapping/jerking when powered off and rebooted.
-* **🤝 Startup Position Handshake**: On boot, the Arduino reads its last-known position from EEPROM (clamping uninitialized states to a safe $90^\circ$), moves there, and outputs an `INIT:base,bottom,top,gripper` handshake signal to coordinate seamless starting glides.
-* **📈 Multi-Mode Trajectory Planners**: Supports both immediate step-coordinate jumps (`rigid_glider.py`) and joint-space linear angle interpolation (`smooth_glider.py`) for smooth path planning.
-* **🛠️ 3D Printable Mechanical Assets**: CAD models (STL/3MF/F3Z formats) located in the workspace under `version_1/` for physical arm manufacturing and prototyping.
+* **Precision Inverse Kinematics**: Custom analytical geometric IK engine solving joint coordinates in real time for precise target tracking.
+* **Sub-Degree Resolution Serial Protocol**: A binary serial packet protocol scaling float angles to centidegrees (1/100th of a degree) and packing them into compact 16-bit big-endian structures for optimal transmission speed and high accuracy.
+* **Non-Volatile Memory (EEPROM)**: The Arduino firmware caches successful servo coordinates to the EEPROM on every valid command, preventing joint snapping/jerking when powered off and rebooted.
+* **Startup Position Handshake**: On boot, the Arduino reads its last-known position from EEPROM (clamping uninitialized states to a safe $90^\circ$), moves there, and outputs an `INIT:base,bottom,top,gripper` handshake signal to coordinate seamless starting glides.
+* **Multi-Mode Trajectory Planners**: Supports both immediate step-coordinate jumps (`rigid_glider.py`) and joint-space linear angle interpolation (`smooth_glider.py`) for smooth path planning.
+* **3D Printable Mechanical Assets**: CAD models (STL/3MF/F3Z formats) located in the workspace under `version_1/` for physical arm manufacturing and prototyping.
 
 ---
 
