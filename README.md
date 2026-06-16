@@ -2,7 +2,11 @@
 
 A high-performance, precision-controlled 3-axis robotic arm project featuring a mathematical Inverse Kinematics (IK) engine, a robust Arduino-based servo controller with EEPROM state persistence, and interactive command-line and graphical dashboards.
 
+
+> 🎬 **Demo** — [Watch smooth_glider.py in action](media/demo_smooth_glider.mov)
+
 ---
+
 
 ## 🌟 Key Features
 
@@ -94,7 +98,7 @@ Located under **version_1** in the **final_print_parts** folder is the full fina
 ## 🚀 Getting The Arm Moving
 
 ### 1. Arduino Setup
-1. Open [robot_arm_controller.ino](file:///Users/tomilan/projects/robotic_arm/robot_arm_controller/robot_arm_firmware/robot_arm_controller.ino) in the **Arduino IDE**.
+1. Open [robot_arm_controller.ino](robot_arm_controller/robot_arm_firmware/robot_arm_controller.ino) in the **Arduino IDE**.
 2. Connect your Arduino board via USB.
 3. Select your Board and Port from the Tools menu.
 4. Click **Upload** to flash the firmware.
@@ -135,7 +139,7 @@ pip install pygame pyserial pandas
 
 ## 📐 Serial Communication Protocol
 
-To ensure sub-degree accuracy without transmission overhead, the system uses a custom binary protocol. Angles are scaled to **centidegrees** (multiplied by 100), converted to signed 16-bit integers, and sent as an 8-byte packet:
+To ensure sub-degree accuracy without transmission overhead, the system uses a custom binary protocol using big-endian. Angles are scaled to **centidegrees** (multiplied by 100), converted to signed 16-bit integers, and sent as an 8-byte packet:
 
 | Byte Index | Data Packed | Description |
 |---|---|---|
