@@ -1,6 +1,6 @@
 import math
 
-# ── PHYSICAL CONFIGURATION ───────────────────────────────────────────────────
+# PHYSICAL CONFIGURATION
 # Easily adjust the mechanical arm segment lengths here:
 BOTTOM_ARM_LENGTH_MM = 100.0   # Shoulder-to-Elbow length (Shoulder)
 TOP_ARM_LENGTH_MM    = 64.0    # Elbow-to-End-Effector length (Elbow)
