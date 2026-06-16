@@ -95,8 +95,9 @@ pip install pygame pyserial pandas
   ```
 
 #### 📈 Waypoint Macro Executions:
+
 * **Smooth Glider (Interpolated)**:
-  Prompts for your waypoint CSV path (e.g., `__test_locations.csv`), handshakes startup coordinates from the Arduino, glides smoothly to the starting point, and interpolates through each subsequent waypoint segment.
+  Prompts for your waypoint CSV path, handshakes startup coordinates from the Arduino, glides smoothly to the starting point, and interpolates through each subsequent waypoint segment.
   ```bash
   python robot_arm_controller/smooth_glider.py
   ```
@@ -106,6 +107,8 @@ pip install pygame pyserial pandas
   python robot_arm_controller/rigid_glider.py
   ```
 
+* **CSV formating**:
+  | x cordinate (mm) | y cordinate (mm) | z cordinate (mm) | gripper angle | time (seconds) |
 ---
 
 ## 📐 Serial Communication Protocol
