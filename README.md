@@ -3,7 +3,7 @@
 A high-performance, precision-controlled 3-axis robotic arm project featuring a mathematical Inverse Kinematics (IK) engine, a robust Arduino-based servo controller with EEPROM state persistence, and interactive command-line and graphical dashboards.
 
 
-> 🎬 **Demo** — [Watch smooth_glider.py in action](media/demo_smooth_glider.gif)
+> 🎬 **Demo** — ![Watch smooth_glider.py in action](media/demo_smooth_glider.gif)
 
 ---
 
