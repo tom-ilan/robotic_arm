@@ -109,7 +109,7 @@ pip install pygame pyserial pandas
 
 * **CSV formating**:
 
-  | **x cordinate** (mm), **y cordinate** (mm), **z cordinate** (mm), **gripper angle** (degree), **time** (seconds)
+  **x cordinate** (mm), **y cordinate** (mm), **z cordinate** (mm), **gripper angle** (degree), **time** (seconds)
 ---
 
 ## 📐 Serial Communication Protocol
