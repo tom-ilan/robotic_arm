@@ -23,3 +23,14 @@ def go_to_mm(ser, x_mm: float, y_mm: float, z_mm: float, gripper_degrees: float)
         ser.write(bytes([base_degrees_packed_big, base_degrees_packed_little, bottom_degrees_packed_big, bottom_degrees_packed_little, top_degrees_packed_big, top_degrees_packed_little, gripper_degrees_packed_big, gripper_degrees_packed_little]))
         ser.flush()
         time.sleep(0.01)
+
+
+def go_to_angle(ser, base: float, bottom: float, top: float, gripper_degrees: float):
+ 
+        base_degrees_packed_big, base_degrees_packed_little = num_packer(base)
+        bottom_degrees_packed_big, bottom_degrees_packed_little = num_packer(bottom)
+        top_degrees_packed_big, top_degrees_packed_little = num_packer(top)
+        gripper_degrees_packed_big, gripper_degrees_packed_little = num_packer(gripper_degrees)
+
+        ser.write(bytes([base_degrees_packed_big, base_degrees_packed_little, bottom_degrees_packed_big, bottom_degrees_packed_little, top_degrees_packed_big, top_degrees_packed_little, gripper_degrees_packed_big, gripper_degrees_packed_little]))
+# Sets up a serial connection the ardunino via the USB modem
