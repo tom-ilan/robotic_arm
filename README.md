@@ -68,27 +68,27 @@ Located under **version_1** in the **final_print_parts** folder is the full fina
 
 1. After 3D printing the parts place the first servo into the base
 
-![Step 1 - Servo seated in base housing](/Users/tomilan/projects/robotic_arm/media/construction_step_1.png)
+![Step 1 - Servo seated in base housing](media/construction_step_1.png)
 
 2. Then screw the top of the base onto the the servo
 
-![Step 2 - Base top placed onto servo](/Users/tomilan/projects/robotic_arm/media/construction_step_2.png)
+![Step 2 - Base top placed onto servo](media/construction_step_2.png)
 
 3. Now screw the lower arm and servo together
 
-![Step 3 - Lower arm assembled with servo](/Users/tomilan/projects/robotic_arm/media/construction_step_3.png)
+![Step 3 - Lower arm assembled with servo](media/construction_step_3.png)
 
 4. Slot the lower arm into the base 
 
-![Step 4 - Lower arm slotted into base](/Users/tomilan/projects/robotic_arm/media/construction_step_4.png)
+![Step 4 - Lower arm slotted into base](media/construction_step_4.png)
 
 5. Insert the servo to the end of the lower arm and upper arm and screw the upper arm to the lower arm 
 
-![Step 5 - Upper arm connected at elbow joint](/Users/tomilan/projects/robotic_arm/media/construction_step_5.png)
+![Step 5 - Upper arm connected at elbow joint](media/construction_step_5.png)
 
 6. Screw the gripper onto the end of the upper arm
 
-![Step 6 - Gripper attached, full assembly complete](/Users/tomilan/projects/robotic_arm/media/construction_step_6.png)
+![Step 6 - Gripper attached, full assembly complete](media/construction_step_6.png)
 ---
 
 ## 🚀 Getting The Arm Moving
